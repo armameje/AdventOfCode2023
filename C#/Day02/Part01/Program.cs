@@ -1,7 +1,7 @@
 ﻿using Day02.Model;
 using System.Text.RegularExpressions;
 
-namespace Day02
+namespace Day02_Part01
 {
     internal class Program
     {
@@ -99,8 +99,6 @@ namespace Day02
         static (string color, int count) GetColorWithValues(string colorCount)
         { 
             string cubeNumberValuepattern = @"(\d+)\s(\w+)";
-
-
 
             var matches = GetMatchingRegex(cubeNumberValuepattern, colorCount);
 
