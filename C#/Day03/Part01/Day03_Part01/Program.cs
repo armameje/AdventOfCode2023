@@ -138,27 +138,12 @@ namespace Day03_Part01
                 //}
             }
 
-            bool firstKey = true;
-            int previousStringLength = 0;
-
             foreach (var item in partNumbers.Keys)
             {
                 var ogLength = og.Length;
                 string temp = og.Substring(partNumbers[item]);
                 int redactedOgLength = og.Substring(0, partNumbers[item]).Length;
-
-                if (firstKey)
-                {
-                    previousStringLength = item.Length;
-                    var z = temp.IndexOf(item);
-                    partNumbers[item] = redactedOgLength + temp.IndexOf(item);
-                    firstKey = false;
-                    continue;
-                }
-
-                var k = temp.IndexOf(item);
                 partNumbers[item] = redactedOgLength + temp.IndexOf(item);
-                var s = og[partNumbers[item]];
             }
 
             foreach (var validNumber in partNumbers.Keys)
