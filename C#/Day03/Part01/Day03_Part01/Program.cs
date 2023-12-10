@@ -1,4 +1,5 @@
-﻿using Day03_Part01.Model.Enum;
+﻿using Day03_Part01.Model;
+using Day03_Part01.Model.Enum;
 using System.Text.RegularExpressions;
 
 namespace Day03_Part01
@@ -29,9 +30,8 @@ namespace Day03_Part01
 
             var sd = "............*....-..811..........846..855......*.............*..$........230.92@............................=....................@65.......";
             var ds = ".*155....822*609....&..84.........155#..............#.....481...968.64................+..337.....152...254..";
-
+            // 1, 8, 33
             bool isFirstLine = true;
-
 
 
             //foreach (var item in z)
@@ -51,9 +51,25 @@ namespace Day03_Part01
             string symbolPattern = @"[^a-zA-Z0-9]";
             Regex regex = new(symbolPattern);
 
-            var s = regex.Match(input).Groups;
+            return regex.IsMatch(input);
+        }
+
+        static bool IsSymbol(string input)
+        {
+            Regex regex = new(Extension.onlySymbolPattern);
 
             return regex.IsMatch(input);
+        }
+
+        static SymbolDetails GetSymbol(string input, int index, string og)
+        {
+            Regex regex = new(Extension.onlySymbolPattern);
+            var symbol = regex.Match(input).Groups;
+
+            string temp = og.Substring(index);
+
+
+            return new SymbolDetails();
         }
 
         static SymbolPosition WhereSymbolAt(string input)
@@ -113,6 +129,34 @@ namespace Day03_Part01
             }
         }
 
+        #region Handling all needed for current line
+        static void GetNumbersNoSymbol()
+        { 
+            
+        }
+
+        static void GetLineDetails(string[] input, string og)
+        {
+            List<SymbolDetails> symbols = new();
+            List<PartNumberDetails> numbers = new();
+            List<PartNumberDetails> numbersWithSymbol = new();
+
+            var inputWithIndexes = input.Select((x, i) => new { index = i, value = x });
+
+            foreach (var item in inputWithIndexes)
+            {
+                if (string.IsNullOrEmpty(item.value)) continue;
+
+                
+
+                if (IsSymbol(item.value)) 
+                {
+                
+                }
+            }
+        }
+
+        #endregion
         // Checks if any number has a symbol beside then in a line
         static List<int> AnySymbolBeside(string[] values, string og)
         {
@@ -138,12 +182,19 @@ namespace Day03_Part01
                 //}
             }
 
+            List<string> allNonPeriod = values.Where(x => !string.IsNullOrEmpty(x)).ToList();
+            var ogLength = og.Length;
+
             foreach (var item in partNumbers.Keys)
             {
-                var ogLength = og.Length;
-                string temp = og.Substring(partNumbers[item]);
-                int redactedOgLength = og.Substring(0, partNumbers[item]).Length;
-                partNumbers[item] = redactedOgLength + temp.IndexOf(item);
+                var s = allNonPeriod.IndexOf(item);
+                var t = allNonPeriod.Where((x, i) => i < s).ToList();
+                int previouslength = PrevLen(t);
+                string temp = og.Substring(partNumbers[item] + previouslength);
+                int redactedOgLength = og.Substring(0, partNumbers[item] + previouslength).Length;
+
+                var ss = og[redactedOgLength];
+                partNumbers[item] = redactedOgLength;
             }
 
             foreach (var validNumber in partNumbers.Keys)
@@ -154,9 +205,16 @@ namespace Day03_Part01
             return parsedPartNumbers;
         }
 
-        static void PartNumbersWithSymbols()
+        static int PrevLen(List<string> k)
         {
+            int total = 0;
 
+            foreach (var item in k)
+            {
+                total += item.Length;
+            }
+
+            return total;
         }
 
         static List<int> SymbolsInPriorLine(string input)
