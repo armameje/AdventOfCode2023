@@ -1,5 +1,6 @@
 ﻿using Day03_Part01.Model;
 using Day03_Part01.Model.Enum;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace Day03_Part01
@@ -29,7 +30,7 @@ namespace Day03_Part01
             }
 
             var sd = "............*....-..811..........846..855......*.............*..$........230.92@............................=....................@65.......";
-            var ds = ".*155....822*609....&..84.........155#..............#.....481...968.64................+..337.....152...254..";
+            var ds = ".*155..822*609..&..84.........155#..............#.....481...968.64................+..337.....152...254..";
             // 1, 8, 33
             bool isFirstLine = true;
 
@@ -39,38 +40,21 @@ namespace Day03_Part01
             //    IsSymbol(item);
             //}
 
-            AnySymbolBeside(ds.Split('.'), ds);
+            //AnySymbolBeside(ds.Split('.'), ds);
+
+            GetLineDetails(ds.Split('.'), ds);
 
             //KekW(sd);
         }
 
         static bool HasSymbol(string input)
         {
-            if (string.IsNullOrEmpty(input)) return false;
+            Regex aheadRegex = new(Extension.numWithSymbolLookAheadPattern);
+            Regex behindRegex = new(Extension.numWithSymbolLookBehindPattern);
 
-            string symbolPattern = @"[^a-zA-Z0-9]";
-            Regex regex = new(symbolPattern);
-
-            return regex.IsMatch(input);
+            return aheadRegex.IsMatch(input) || behindRegex.IsMatch(input);
         }
 
-        static bool IsSymbol(string input)
-        {
-            Regex regex = new(Extension.onlySymbolPattern);
-
-            return regex.IsMatch(input);
-        }
-
-        static SymbolDetails GetSymbol(string input, int index, string og)
-        {
-            Regex regex = new(Extension.onlySymbolPattern);
-            var symbol = regex.Match(input).Groups;
-
-            string temp = og.Substring(index);
-
-
-            return new SymbolDetails();
-        }
 
         static SymbolPosition WhereSymbolAt(string input)
         {
@@ -131,8 +115,21 @@ namespace Day03_Part01
 
         #region Handling all needed for current line
         static void GetNumbersNoSymbol()
-        { 
-            
+        {
+
+        }
+        static bool IsSymbol(string input)
+        {
+            Regex regex = new(Extension.onlySymbolPattern);
+
+            return regex.IsMatch(input);
+        }
+
+        static bool IsCharacter(string input)
+        {
+            Regex regex = new(Extension.onlyNumberPattern);
+
+            return regex.IsMatch(input);
         }
 
         static void GetLineDetails(string[] input, string og)
@@ -140,19 +137,48 @@ namespace Day03_Part01
             List<SymbolDetails> symbols = new();
             List<PartNumberDetails> numbers = new();
             List<PartNumberDetails> numbersWithSymbol = new();
+            ImmutableList<string> allNoPeriod = input.Where(x => !string.IsNullOrEmpty(x)).ToImmutableList();
+            List<string> allNonPeriod = input.Where(x => !string.IsNullOrEmpty(x)).ToList();
+            List<int> allNonPeriodLengths = new();
 
-            var inputWithIndexes = input.Select((x, i) => new { index = i, value = x });
+            foreach (var item in allNoPeriod)
+            {
+                allNonPeriodLengths.Add(item.Length);
+            }
+
+            int ogLength = og.Length;
+
+
+            var inputWithIndexes = input.Select((x, i) => new { index = i, value = x }).ToList();
 
             foreach (var item in inputWithIndexes)
             {
                 if (string.IsNullOrEmpty(item.value)) continue;
 
-                
+                var currentIndexOfValid = allNonPeriod.IndexOf(item.value);
+                int prevLen = PrevLen(allNonPeriodLengths.Where((x, i) => i < currentIndexOfValid).ToList()); // Returns length of other previous valid strings
+                string temp = og.Substring(item.index + prevLen);
+                int redactedOgLength = og.Substring(0, item.index + prevLen).Length;
 
-                if (IsSymbol(item.value)) 
+
+                if (IsSymbol(item.value))
                 {
-                
+                    symbols.Add(new SymbolDetails { Index = redactedOgLength, Symbol = item.value.ToCharArray()[0] });
                 }
+
+                if (IsCharacter(item.value))
+                {
+                    numbers.Add(new PartNumberDetails { Index = item.index, Number = item.value });
+                }
+
+                if (HasSymbol(item.value))
+                {
+                    // Process the string to remove symbol
+                    numbersWithSymbol.Add(new PartNumberDetails { Index = item.index, Number = item.value });
+                }
+
+
+                allNonPeriod[allNonPeriod.IndexOf(item.value)] = string.Empty; // Set Symbol 
             }
         }
 
@@ -187,14 +213,14 @@ namespace Day03_Part01
 
             foreach (var item in partNumbers.Keys)
             {
-                var s = allNonPeriod.IndexOf(item);
-                var t = allNonPeriod.Where((x, i) => i < s).ToList();
-                int previouslength = PrevLen(t);
-                string temp = og.Substring(partNumbers[item] + previouslength);
-                int redactedOgLength = og.Substring(0, partNumbers[item] + previouslength).Length;
+                //var s = allNonPeriod.IndexOf(item);
+                //var t = allNonPeriod.Where((x, i) => i < s).ToList();
+                //int previouslength = PrevLen(t);
+                //string temp = og.Substring(partNumbers[item] + previouslength);
+                //int redactedOgLength = og.Substring(0, partNumbers[item] + previouslength).Length;
 
-                var ss = og[redactedOgLength];
-                partNumbers[item] = redactedOgLength;
+                //var ss = og[redactedOgLength];
+                //partNumbers[item] = redactedOgLength;
             }
 
             foreach (var validNumber in partNumbers.Keys)
@@ -205,13 +231,13 @@ namespace Day03_Part01
             return parsedPartNumbers;
         }
 
-        static int PrevLen(List<string> k)
+        static int PrevLen(List<int> k)
         {
             int total = 0;
 
             foreach (var item in k)
             {
-                total += item.Length;
+                total += item;
             }
 
             return total;
