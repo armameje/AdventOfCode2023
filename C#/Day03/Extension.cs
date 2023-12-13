@@ -2,7 +2,7 @@
 {
     internal static class Extension
     {
-        public static readonly string hasSymbolPattern = @"^(\d+)?[^a-zA-Z0-9](\d+)?$";
+        public static readonly string hasSymbolPattern = @"[^a-zA-Z0-9]";
         public static readonly string onlySymbolPattern = @"^[^a-zA-Z0-9]$";
         public static readonly string onlyNumberPattern = @"^\d+$";
         public static readonly string numWithSymbolLookAheadPattern = @"(\d+)(?=[^a-zA-Z0-9\.])";
