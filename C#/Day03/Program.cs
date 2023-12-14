@@ -9,10 +9,11 @@ namespace Day03_Part01
             var lines = File.ReadAllLines("Day03.input.txt");
             var lineLength = lines[0].Length;
 
-            var symbolsRegex = new Regex("[^0-9.]");
+            var symbolsRegex = new Regex(@"[^0-9.]");
             var numbersRegex = new Regex(@"\d+");
+            var gearRegex = new Regex(@"[*]");
 
-            var potentialGears = new Dictionary<string, List<int>>();
+            var possibleGears = new Dictionary<string, List<int>>();
             var validPartNumbers = new List<int>();
 
             var numbers = lines.SelectMany(
@@ -44,8 +45,27 @@ namespace Day03_Part01
                         validPartNumbers.Add(number.Value);
                     }
 
+                    var gearMatch = gearRegex.Match(range);
+
+                    if (gearMatch.Success)
+                    {
+                        var gearKey = $"{startingScan + gearMatch.Index}-{lineNumber}";
+
+                        if (possibleGears.ContainsKey(gearKey))
+                        {
+                            possibleGears[gearKey].Add(number.Value);
+                        }
+                        else
+                        {
+                            possibleGears.Add(gearKey, new List<int> { number.Value });
+                        }
+                    }
                 }
             }
+
+            var legitGears = possibleGears.Where(x => x.Value.Count == 2).Select(x => x.Value);
+
+            var gearRatio = legitGears.Select(x => x[0] * x[1]).Sum();
 
             var xxx = validPartNumbers.Sum();
         }
