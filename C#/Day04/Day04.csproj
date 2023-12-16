@@ -16,5 +16,12 @@
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
   </ItemGroup>
-
+	<ItemGroup>
+		<None Update="Day04.sample1.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Day04.input.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
